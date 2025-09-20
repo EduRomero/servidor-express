@@ -1,0 +1,13 @@
+[
+    {
+        "id": 1,
+        "title": "Remera",
+	    "description": "Remera manga corta",
+	    "code": "2323",
+	    "price": 25000,
+	    "status": true,
+	    "stock": 5,
+	    "category": "Prenda",
+	    "thumbnails": ["/ropa"]
+    }
+]
