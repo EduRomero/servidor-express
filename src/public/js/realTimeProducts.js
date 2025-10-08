@@ -15,7 +15,6 @@ socket.on('nuevoProducto', (product) => {
 socket.on('eliminarProducto', (id) => {
     const list = document.getElementById('product-list');
     const items = list.getElementsByTagName('li');
-    console.log('Eliminando:', items);
     for (let i = 0; i < items.length; i++) {
         if (items[i].dataset.id == id) {
             list.removeChild(items[i]);
