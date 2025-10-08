@@ -13,7 +13,7 @@ class ProductsManager{
         }
     }
 
-    static async getProducts(id){
+    static async getProductsById(id){
         if(fs.existsSync(this.path)){
             this.products=JSON.parse(await fs.promises.readFile(this.path, "utf-8"))
             const producto=this.products.find(p=>p.id==id)
@@ -53,6 +53,29 @@ class ProductsManager{
         await fs.promises.writeFile(this.path, JSON.stringify(this.products, null, 5))
         return nuevoProducto
     }    
+
+    static deleteProduct(id){
+        let index=this.products.findIndex(p=>p.id==id)
+        if(index!=-1){
+            this.products.splice(index, 1)
+            fs.promises.writeFile(this.path, JSON.stringify(this.products, null, 5))
+            return `Producto con id ${id} eliminado`
+        }
+        return `No existe un producto con id ${id}`
+    }
+
+    static async updateProduct(id, title, description, code, price, status, stock,
+                            category, thumbnails){
+        await this.getProducts()
+        let index=this.products.findIndex(p=>p.id==id)
+        if(index!=-1){
+            this.products[index]={id, title, description, code, price, status, stock,
+                category, thumbnails}
+            await fs.promises.writeFile(this.path, JSON.stringify(this.products, null, 5))
+            return this.products[index]
+        }
+        return `No existe un producto con id ${id}`
+    }
 }
 
 module.exports = {ProductsManager}
