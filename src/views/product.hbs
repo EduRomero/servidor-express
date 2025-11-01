@@ -1,0 +1,32 @@
+<link rel="stylesheet" href="/css/style.css">
+
+<div class="container product-page">
+  <div class="product-card2">
+    <div class="product-main">
+      <h2 class="product-heading">Producto</h2>
+      <hr>
+
+      <h3 class="product-title3">{{title}}</h3>
+      <p class="product-desc3">{{description}}</p>
+
+      <ul class="product-meta-list">
+        <li><strong>Código:</strong> {{code}}</li>
+        <li><strong>Precio:</strong> ${{price}}</li>
+        <li><strong>Estado:</strong> {{status}}</li>
+        <li><strong>Stock:</strong> {{stock}}</li>
+        <li><strong>Categoría:</strong> {{category}}</li>
+      </ul>
+    </div>
+
+    <div class="product-actions">
+     <a id="addToCart" class="btn2 btn-primary" href="#" data-product-id="{{_id}}">Agregar al Carrito</a> 
+    </div>
+    
+  </div>
+  <div class="back-link">
+    <a class="btn2 btn-secondary" href="/api/products">Volver a Productos</a>
+  </div>
+  
+</div>
+
+<script src="/js/product.js"></script>

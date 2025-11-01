@@ -4,12 +4,13 @@ const { ProductsManager } = require("../dao/ProductsManager.js")
 const productsRouter = Router();
 
 productsRouter.get("/", async (req, res) => {
+    let { limit, page, sort, category, status } = req.query
     try {
-        const products = await ProductsManager.getProducts()
+        const { docs: products, totalPages, hasPrevPage, hasNextPage, prevPage, nextPage } = await ProductsManager.getProducts(limit, page, sort, category, status)
         if (products.length === 0) {
             return res.status(404).send("No hay productos disponibles")
         }
-        res.render("home", {products})
+        res.render("home", {products, totalPages, hasPrevPage, hasNextPage, prevPage, nextPage})
     }
     catch (error) {
         console.error("Error al obtener productos:", error)
@@ -21,9 +22,9 @@ productsRouter.get("/", async (req, res) => {
 productsRouter.get("/:id", async (req, res) => {
     const { id } = req.params
     try {
-        const products = await ProductsManager.getProductsById(id)
-        res.setHeader('Content-Type', 'application/json');
-        return res.status(200).json({products})
+        const product = await ProductsManager.getProductsById(id)        
+        const prod = product.toObject ? product.toObject() : product;
+        res.render("product", prod)
     }
     catch (error) {
         console.error("Error al obtener productos:", error)
@@ -33,14 +34,14 @@ productsRouter.get("/:id", async (req, res) => {
 })
 
 productsRouter.post("/", async (req, res) => {
-    const {title, description, code, price, status, stock, category, thumbnails } = req.body   
+    const {id, title, description, code, price, status, stock, category, thumbnails } = req.body   
     try {
         if(!title || !description || !code){
             res.setHeader('Content-Type', 'application/json');
             return res.status(400).json({error: "Complete los datos obligatorios: title, description, code"})
         }
         
-        const nuevoProducto = await ProductsManager.addProduct(title, description, code, price, status, stock, category, thumbnails)
+        const nuevoProducto = await ProductsManager.addProduct(id, title, description, code, price, status, stock, category, thumbnails)
         req.socket.emit("nuevoProducto", nuevoProducto)
 
         res.setHeader('Content-Type', 'application/json');
@@ -56,7 +57,7 @@ productsRouter.post("/", async (req, res) => {
 productsRouter.delete("/:id", async (req, res) => {
     const { id } = req.params
     try {
-        const resultado = await ProductsManager.deleteProduct(parseInt(id))
+        const resultado = await ProductsManager.deleteProduct(id)
         req.socket.emit("eliminarProducto", id)
         res.setHeader('Content-Type', 'application/json');
         return res.status(200).json({resultado})

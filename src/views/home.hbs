@@ -1,12 +1,33 @@
-<h2>Productos</h2>
-<hr>
+<link rel="stylesheet" href="/css/style.css">
 
-<ul>
+<div class="container">
+  <h2>Productos</h2>
+  <hr>
+
+  <div class="products-grid">
     {{#each products}}
-        <li>
-        <h3>{{title}}</h3>
-        <p>Precio: ${{price}}</p>
-        <p>Descripción: {{description}}</p>
-        </li>
+      <article class="product-card" data-id="{{_id}}">
+        <div class="product-info">
+          <h3 class="product-title">{{title}}</h3>
+          <p class="product-price">$ {{price}}</p>
+          <p class="product-desc">{{description}}</p>
+          <a class="btn" href="/api/products/{{_id}}">Ver Producto</a>
+          <a href="#" class="btn add-to-cart" data-product-id="{{_id}}">Agregar al Carrito</a>
+        </div>
+      </article>
     {{/each}}
-</ul>
+  </div>
+
+  <nav class="pagination">
+    <a class="page-link" href="/api/products?page=1">Primera</a>
+    {{#if hasPrevPage}}
+      <a class="page-link" href="/api/products?page={{prevPage}}">Anterior</a>
+    {{/if}}
+    {{#if hasNextPage}}
+      <a class="page-link" href="/api/products?page={{nextPage}}">Siguiente</a>
+    {{/if}}
+    <a class="page-link" href="/api/products?page={{totalPages}}">Última</a>
+  </nav>
+</div>
+
+<script src="/js/home.js"></script>

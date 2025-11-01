@@ -1,66 +1,85 @@
-const fs = require("fs")
+const { CartModel } = require("./models/cartModel")
 
 class CartManager{
     static carts = []
-    static path="./src/data/carts.json"
 
     static async getAllCarts(){
-        if(fs.existsSync(this.path)){
-            this.carts=JSON.parse(await fs.promises.readFile(this.path, "utf-8"))
-            return this.carts
-        }else{
-            return []
-        }
+        return await CartModel.find().populate('products.product')
     }
 
-    static async getCarts(id){
-        if(fs.existsSync(this.path)){
-            this.carts=JSON.parse(await fs.promises.readFile(this.path, "utf-8"))
-            const cart=this.carts.find(p=>p.id==id)
-            return cart.products
-        }else{
-            return []
-        }
+    static async getCartsById(id){
+        return await CartModel.findById(id).populate('products.product')
     }
 
     static async addCart(products){
-        await this.getAllCarts()
-        let id=1
-        
-        if(this.carts.length > 0){
-            id=Math.max(...this.carts.map(d=>d.id))+1
-        }
-        else {
-            return "error"
-        }
-        
-        let nuevoCarrito={
-            id, 
-            products
-        }        
-
-        this.carts.push(nuevoCarrito)
-        await fs.promises.writeFile(this.path, JSON.stringify(this.carts, null, 5))
-        return nuevoCarrito
+        const newCart = new CartModel({products})
+        await newCart.save()
+        return newCart
     }    
 
     static async addProduct(cid, pid){
-        const product = await this.getCarts(cid)
-
-        if(product.length==0) {
-            return "Carrito no encontrado"
+        const cart = await CartModel.findById(cid)
+        if(!cart){
+            return `No se encontró el carrito con id ${cid}`
         }
-
-        const prodId = product.find(p=>p.productId==pid)
-        
-        if(prodId==undefined){
-            product.push({product: pid, quantity: 1})
+        const productIndex = cart.products.findIndex(p => p.product.toString() === pid)
+        if(productIndex !== -1){
+            cart.products[productIndex].quantity += 1
         } else {
-            prodId.quantity++
+            cart.products.push({ product: pid, quantity: 1 })
         }
+        await cart.save()
+        return cart
+    }
 
-        await fs.promises.writeFile(this.path, JSON.stringify(this.carts, null, 5))
-        return product
+    static async deleteProduct(cid, pid){
+        const cart = await CartModel.findById(cid)
+        if(!cart){
+            return `No se encontró el carrito con id ${cid}`
+        }
+        const productIndex = cart.products.findIndex(p => p.product.toString() === pid)
+        if(productIndex !== -1){
+            cart.products.splice(productIndex, 1)
+            await cart.save()
+            return cart
+        } else {
+            return `No se encontró el producto con id ${pid} en el carrito ${cid}`
+        }
+    }
+
+    static async deleteAllProducts(cid){
+        const cart = await CartModel.findById(cid)
+        if(!cart){
+            return `No se encontró el carrito con id ${cid}`
+        }
+        cart.products = []
+        await cart.save()
+        return cart
+    }
+
+    static async updateCart(cid, products){
+        const cart = await CartModel.findById(cid)
+        if(!cart){
+            return `No se encontró el carrito con id ${cid}`
+        }
+        cart.products = products
+        await cart.save()
+        return cart
+    }
+
+    static async updateProductQuantity(cid, pid, quantity){
+        const cart = await CartModel.findById(cid)
+        if(!cart){
+            return `No se encontró el carrito con id ${cid}`
+        }
+        const productIndex = cart.products.findIndex(p => p.product.toString() === pid)
+        if(productIndex !== -1){
+            cart.products[productIndex].quantity = quantity
+            await cart.save()
+            return cart
+        } else {
+            return `No se encontró el producto con id ${pid} en el carrito ${cid}`
+        }
     }
 }
 

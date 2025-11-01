@@ -1,80 +1,40 @@
-const fs=require("fs")
+const { ProductModel } = require("./models/productsModel")
 
 class ProductsManager{
     static products = []
-    static path="./src/data/products.json"
 
-    static async getProducts(){
-        if(fs.existsSync(this.path)){
-            this.products=JSON.parse(await fs.promises.readFile(this.path, "utf-8"))
-            return this.products
-        }else{
-            return []
+    static async getProducts(limit = 10, page = 1, sort, category, status){
+        const filter = {}
+        if (category) {
+            filter.category = category
         }
+        if (typeof status !== 'undefined') {
+            const statusBool = (status === 'true' || status === true)
+            filter.status = statusBool
+        }
+        return await ProductModel.paginate(filter, { limit, page, lean: true, sort: sort ? { price: sort === "asc" ? 1 : -1 } : {}})
     }
 
     static async getProductsById(id){
-        if(fs.existsSync(this.path)){
-            this.products=JSON.parse(await fs.promises.readFile(this.path, "utf-8"))
-            const producto=this.products.find(p=>p.id==id)
-            return producto
-        }else{
-            return []
-        }
+        return await ProductModel.findById(id)
     }
 
-    static async addProduct(title, description, code, price, status, stock,
+    static async addProduct(id, title, description, code, price, status, stock,
                             category, thumbnails){
-        await this.getProducts()
-
-        let existe=this.products.find(u=>u.code==code)
-        if(existe){
-            return `Ya existe un producto con codigo ${code}: ${existe.title}`
-        }
-
-        let id=1
-        if(this.products.length > 0){
-            id=Math.max(...this.products.map(d=>d.id))+1
-        }
-        
-        let nuevoProducto={
-            id, 
-            title,
-            description,
-            code,
-            price,
-            status,
-            stock,
-            category,
-            thumbnails
-        }        
-
-        this.products.push(nuevoProducto)
-        await fs.promises.writeFile(this.path, JSON.stringify(this.products, null, 5))
-        return nuevoProducto
+        const newProduct = new ProductModel({id, title, description, code, price, status, stock,
+            category, thumbnails})
+        await newProduct.save()
+        return newProduct
     }    
 
-    static deleteProduct(id){
-        let index=this.products.findIndex(p=>p.id==id)
-        if(index!=-1){
-            this.products.splice(index, 1)
-            fs.promises.writeFile(this.path, JSON.stringify(this.products, null, 5))
-            return `Producto con id ${id} eliminado`
-        }
-        return `No existe un producto con id ${id}`
+    static async deleteProduct(id){
+        return ProductModel.findByIdAndDelete(id)
     }
 
     static async updateProduct(id, title, description, code, price, status, stock,
                             category, thumbnails){
-        await this.getProducts()
-        let index=this.products.findIndex(p=>p.id==id)
-        if(index!=-1){
-            this.products[index]={id, title, description, code, price, status, stock,
-                category, thumbnails}
-            await fs.promises.writeFile(this.path, JSON.stringify(this.products, null, 5))
-            return this.products[index]
-        }
-        return `No existe un producto con id ${id}`
+        return ProductModel.findByIdAndUpdate(id, {title, description, code, price, status, stock,
+            category, thumbnails}, {new: true})
     }
 }
 

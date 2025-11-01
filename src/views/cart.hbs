@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="/css/style.css">
+
+<div class="container cart-page">
+  <header class="cart-header">
+    <h2>Carrito: {{_id}}</h2>
+    <hr>
+  </header>
+
+  {{#if products}}
+    <ul class="cart-list">
+      {{#each products}}
+        <li class="cart-item">
+          <div class="product-meta">
+            <h3 class="product-title2">Producto ID: {{this.product.id}}</h3>
+            <p class="product-name">{{this.product.title}}</p>
+            <p class="product-code">Código: {{this.product.code}}</p>
+            <p class="product-desc2">Descripción: {{this.product.description}}</p>
+          </div>
+
+          <div class="product-info2">
+            <p class="product-price2">$ {{this.product.price}}</p>
+            <p class="product-qty">Cantidad: <span class="qty">{{this.quantity}}</span></p>
+          </div>
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p class="empty-cart">El carrito está vacío.</p>
+  {{/if}}
+</div>
